@@ -1,7 +1,7 @@
-const { isEmail, isLength } = require('validator');
-const jwt = require('jwt-simple');
-const { User } = require('../models');
-const { secret } = require('../config');
+const { isEmail, isLength } = require("validator");
+const jwt = require("jwt-simple");
+const { User } = require("../models");
+const { secret } = require("../config");
 
 function tokenForUser(user) {
   // 1st argument is the information we want to encode
@@ -12,7 +12,10 @@ function tokenForUser(user) {
   const timeStamp = new Date().getTime();
   // This subject will become the payload in our strategy
   // eslint-disable-next-line no-underscore-dangle
-  return jwt.encode({ sub: user._id, iat: timeStamp }, secret);
+  return jwt.encode(
+    { sub: user._id, iat: timeStamp },
+    process.env.SECRET || secret
+  );
 }
 
 module.exports = {
@@ -20,21 +23,29 @@ module.exports = {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(422).json({ error: 'You must provide email and password' });
+      return res
+        .status(422)
+        .json({ error: "You must provide email and password" });
     }
 
     if (!isEmail(email)) {
-      return res.status(403).json({ error: 'You must provide a valid email address' });
+      return res
+        .status(403)
+        .json({ error: "You must provide a valid email address" });
     }
 
     if (!isLength(password, { min: 6 })) {
-      return res.status(403).json({ error: 'Your password must be at least 6 characters long' });
+      return res
+        .status(403)
+        .json({ error: "Your password must be at least 6 characters long" });
     }
 
     try {
       // See if a user with the given email exists
       const existingUser = await User.findOne({ email });
-      if (existingUser) { return res.status(403).json({ error: 'User already exists' }); }
+      if (existingUser) {
+        return res.status(403).json({ error: "User already exists" });
+      }
       const user = await new User({ email, password }).save();
       // Eventually we will send a token
       return res.json({ token: tokenForUser(user) });

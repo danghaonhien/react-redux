@@ -14,6 +14,7 @@ const composeEnhancers =
 // 1st param is our reducers
 // 2nd param is any preloaded state we want
 // 3rd param is any middlwares we want applied to redux
+
 const store = createStore(
   reducers,
   { auth: { authenticated: localStorage.getItem("token") } },

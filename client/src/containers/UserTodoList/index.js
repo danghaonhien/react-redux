@@ -9,16 +9,17 @@ import {
   List,
   Pagination,
   Button,
-  MessageItem,
 } from "semantic-ui-react";
-
 import { compose } from "redux";
-
 import axios from "axios";
 import UserTodoListItems from "./UserTodoListItems";
-import { getUserTodos } from "../../actions/todos";
+import requireAuth from "../../hoc/requireAuth";
+import {
+  getUserTodos,
+  updateTodoCompletedById,
+  deleteTodoById,
+} from "../../actions/todos";
 import { ADD_TODO_ERROR, ADD_TODO } from "../../actions/types";
-
 class UserTodoList extends Component {
   state = {
     activePage: 1,
@@ -36,11 +37,9 @@ class UserTodoList extends Component {
       dispatch({ type: ADD_TODO_ERROR, payload: e });
     }
   };
-
   componentDidMount() {
     this.props.getUserTodos();
   }
-
   renderAddTodo = ({ input, meta }) => {
     return (
       <>
@@ -54,16 +53,16 @@ class UserTodoList extends Component {
       </>
     );
   };
-  handlePageChange(event, data) {
-    console.log(data);
+  handlePageChange = (event, data) => {
     this.setState({
       activePage: data.activePage,
       start: data.activePage === 1 ? 0 : data.activePage * 10 - 10,
       end: data.activePage * 10,
     });
-  }
+  };
   render() {
     const { handleSubmit } = this.props;
+    console.log(this.props);
     return (
       <>
         <Header
@@ -81,11 +80,13 @@ class UserTodoList extends Component {
         <List animated divided selection>
           <UserTodoListItems
             todos={this.props.todos.slice(this.state.start, this.state.end)}
+            handleUpdate={this.props.updateTodoCompletedById}
+            handleDelete={this.props.deleteTodoById}
           />
         </List>
         {this.props.todos.length <= 9 ? null : (
           <Pagination
-            totalPages={Math.ceil(this.props.todos.length)}
+            totalPages={Math.ceil(this.props.todos.length / 10)}
             onPageChange={(event, data) => this.handlePageChange(event, data)}
             activePage={this.state.activePage}
           />
@@ -94,7 +95,6 @@ class UserTodoList extends Component {
     );
   }
 }
-
 // function mapStateToProps(state) {
 //   return {
 //     todos: state.todos.userTodos,
@@ -102,27 +102,33 @@ class UserTodoList extends Component {
 //     serverError: state.todos.getUserTodosServerError
 //   };
 // }
-
 function mapStateToProps({
-  todos: { userTodos, getUserTodosServerError, getUserTodosClientError },
+  todos: {
+    userTodos,
+    getUserTodosServerError,
+    getUserTodosClientError,
+    deleteTodoByIdError,
+  },
 }) {
   return {
     todos: userTodos,
     clientError: getUserTodosClientError,
     serverError: getUserTodosServerError,
+    deleteTodoByIdError,
   };
 }
-
 // const composedComponent = connect(mapStateToProps, { getUserTodos })(UserTodoList);
-
 // 1 way
 // export default reduxForm({ form: 'addTodo' })(connect(mapStateToProps, { getUserTodos })(UserTodoList));
-
 // 2nd way
 // const composedComponent = connect(mapStateToProps, { getUserTodos })(UserTodoList);
 // export default reduxForm({ form: 'addTodo'})(composedComponent);
-
 export default compose(
   reduxForm({ form: "addTodo" }),
-  connect(mapStateToProps, { getUserTodos })
+  requireAuth,
+  connect(mapStateToProps, {
+    getUserTodos,
+    updateTodoCompletedById,
+    deleteTodoById,
+  })
 )(UserTodoList);

@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
 const TodoSchema = new Schema({
   text: {
@@ -13,9 +13,9 @@ const TodoSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  user: { type: Schema.Types.ObjectId, ref: 'User' },
+  user: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
-const Todo = model('Todo', TodoSchema);
+const Todo = model("Todo", TodoSchema);
 
 module.exports = Todo;

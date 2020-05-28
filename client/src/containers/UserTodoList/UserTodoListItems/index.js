@@ -1,5 +1,6 @@
 import React from "react";
 import { Header, List, Button } from "semantic-ui-react";
+import DeleteTodoModal from "./../../../components/DeleteTodoModal";
 export default (props) => {
   if (props.todos.length === 0) {
     return <Header content='No todos yet, please add a todo' />;
@@ -18,7 +19,17 @@ export default (props) => {
             </p>
           </List.Content>
           <List.Content floated='right'>
-            <Button color='blue' content='Mark Complete' size='small' />
+            <Button
+              color='blue'
+              content='Mark Complete'
+              size='small'
+              onClick={() => props.handleUpdate(_id, completed, text)}
+            />
+            <DeleteTodoModal
+              handleDelete={props.handleDelete}
+              id={_id}
+              text={text}
+            />
           </List.Content>
         </List.Item>
       );
